@@ -1,0 +1,87 @@
+#!/bin/bash
+
+# list all strings which look like c language identifier
+
+awk '
+
+function look0(tok) {
+    parser_warn(CNT[ICNT,"line"])
+}
+
+function look(tok) { if (tok ~ REGEXP) look0(tok) }
+
+BEGIN {
+    # regexp for c language identifier
+    NAME = "[_A-Za-z][_A-Za-z0-9]*"
+
+    # separator
+    SEP  = "[^_A-Za-z]*"
+
+    # the rest (any character)
+    C    = "."
+
+    REGEXP = ARGV[1]; shift()
+}
+
+{
+    reg_string(sep $0); sep = RS
+}
+
+function reg_string(s,   c, n) {
+    for (i = 1; i <= length(s); i++) {
+	c = ch(s, i)
+	ICNT++
+	CNT[ICNT,"loc"]   = FILENAME ":" FNR # context for errors and warnings
+	CNT[ICNT,"line"] = no_end(s)
+	F = F c
+    }
+}
+
+function process(  tok) {
+    for (;;) {
+	tok = nxt(NAME)
+	if (!zerop(tok)) {
+	    look(tok)
+	} else {
+	    if (zerop(tok = nxt(SEP)) &&
+		zerop(tok = nxt(C))) return
+	}
+    }
+}
+
+END {
+    ICNT = 0 # set context pointer
+    process()
+}
+
+function nxt(r,   tok) { # next token; move in F
+    if (!match(F, "^" r)) return
+    tok = substr(F, 1, RLENGTH)
+    F   = substr(F, 1 + RLENGTH)
+    ICNT += RLENGTH  # move context pointer
+    return tok
+}
+
+function req_c(e) {
+    if (e ~ NAME) return
+    die(e ": not c identifier")
+}
+
+function req_nzero(e) {
+    if (!zerop(e)) return
+    die(e ": argument should be given")
+}
+
+function zerop(l) { return length(l) == 0 }
+function ch(l, i) { return substr(l, i, 1)} # character
+
+function parser_die (s) { printf "%s: error: %s\n",   CNT[ICNT,"loc"], s | "cat 1>&2"; exit 1 }
+function parser_warn(s) { printf "%s: warning: %s\n", CNT[ICNT,"loc"], s | "cat 1>&2"; close("cat 1>&2")}
+function no_end(s) { sub(/\n$/, "", s); sub(/^\n/, "", s); return s }
+
+function die (s)  { printf "ugrep: %s\n",   s | "cat 1>&2"; exit 1 }
+function warn(s)  { printf ": warning: %s\n", s | "cat 1>&2"; close("cat 1>&2")}
+function shift(  i) { for (i = 2; i < ARGC; i++) ARGV[i-1] = ARGV[i]; ARGC-- }
+
+' "$@"
+
