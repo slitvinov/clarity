@@ -11,7 +11,13 @@ function found(tok,   line) {
     else       print       line
 }
 
-function look(tok) { if (tok ~ REGEXP) found(tok) }
+function look(tok) {
+    if (Eflag) look_e(tok) # regular expression
+    else       look_s(tok) # fixed string
+}
+
+function look_e(tok) {if (      tok ~ PAT)        found(tok)}
+function look_s(tok) {if (fstr(tok) == fstr(PAT)) found(tok)}
 
 BEGIN {
     # regexp for c language identifier
@@ -23,9 +29,12 @@ BEGIN {
     # the rest (any character)
     C    = "."
 
-    if (ARGV[1] == "-n") {Nflag = 1; shift()}
-
-    REGEXP = ARGV[1]; shift()
+    for (;;) {
+	if (ARGV[1] == "-n") {Nflag = 1; shift(); continue}
+	if (ARGV[1] == "-e") {Eflag = 1; shift(); continue}
+	break
+    }
+    PAT = ARGV[1]; shift()
 }
 
 {
@@ -85,12 +94,15 @@ function no_end(s) { sub(/\n$/, "", s); sub(/^\n/, "", s); return s }
 
 function die (s)  { printf "ugrep: %s\n",   s | "cat 1>&2"; exit 1 }
 function shift(  i) { for (i = 2; i < ARGC; i++) ARGV[i-1] = ARGV[i]; ARGC-- }
+function fstr(s) {return s ""} # [f]orce [str]ing
 
 ' "$@"
 
 # TEST: ugrep.t0
-# ./ugrep -n srclane1 test_data/sdstr.h > ugrep.out.txt
+# ./ugrep -n srclane1 test_data/sdstr.h      > ugrep.out.txt
 #
 # TEST: ugrep.t1
-# ./ugrep   srclane1 test_data/sdstr.h > ugrep.out.txt
-
+# ./ugrep srclane1 test_data/sdstr.h         > ugrep.out.txt
+#
+# TEST: ugrep.t2
+# ./ugrep -e '^data[012]$' test_data/sdstr.h > ugrep.out.txt

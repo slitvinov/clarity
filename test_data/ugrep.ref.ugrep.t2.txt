@@ -1,0 +1,36 @@
+    float2 data0, data1, data2;
+    float2 data0, data1, data2;
+    float2 data0, data1, data2;
+    k_common::read_AOS6f(unpack_buffers[code].buffer + 3 * unpackbase, nunpack, data0, data1, data2);
+    k_common::read_AOS6f(unpack_buffers[code].buffer + 3 * unpackbase, nunpack, data0, data1, data2);
+    k_common::read_AOS6f(unpack_buffers[code].buffer + 3 * unpackbase, nunpack, data0, data1, data2);
+      data0.x += XS * ((code + 1) % 3 - 1);
+      data0.y += YS * ((code / 3 + 1) % 3 - 1);
+      data1.x += ZS * ((code / 9 + 1) % 3 - 1);
+      xcid = (int)floor((double)data0.x + XS / 2);
+      ycid = (int)floor((double)data0.y + YS / 2);
+      zcid = (int)floor((double)data1.x + ZS / 2);
+    k_common::write_AOS6f(dstbuf + 3 * dstbase, nunpack, data0, data1, data2);
+    k_common::write_AOS6f(dstbuf + 3 * dstbase, nunpack, data0, data1, data2);
+    k_common::write_AOS6f(dstbuf + 3 * dstbase, nunpack, data0, data1, data2);
+    float2 data0, data1, data2;
+    float2 data0, data1, data2;
+    float2 data0, data1, data2;
+	data0 = __ldg(remoteparticles + 0 + 3 * spid);
+	data1 = __ldg(remoteparticles + 1 + 3 * spid);
+	data2 = __ldg(remoteparticles + 2 + 3 * spid);
+	data0 = tex1Dfetch(texPP2, 0 + 3 * spid);
+	data1 = tex1Dfetch(texPP2, 1 + 3 * spid);
+	data2 = tex1Dfetch(texPP2, 2 + 3 * spid);
+    float3 s0 = make_float3(data0.x, data0.y, data1.x);
+    float3 s0 = make_float3(data0.x, data0.y, data1.x);
+    float3 s0 = make_float3(data0.x, data0.y, data1.x);
+    float3 s1 = make_float3(data1.y, data2.x, data2.y);
+    float3 s1 = make_float3(data1.y, data2.x, data2.y);
+    float3 s1 = make_float3(data1.y, data2.x, data2.y);
+      zip1[base + tid] = make_ushort4(__float2half_rn(data0.x),
+				      __float2half_rn(data0.y),
+				      __float2half_rn(data1.x),
+    k_common::write_AOS6f(dstbuf + 3 * base, nsrc, data0, data1, data2);
+    k_common::write_AOS6f(dstbuf + 3 * base, nsrc, data0, data1, data2);
+    k_common::write_AOS6f(dstbuf + 3 * base, nsrc, data0, data1, data2);
