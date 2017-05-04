@@ -4,8 +4,11 @@
 
 awk '
 
-function found(tok) {
-    parser_warn(CNT[ICNT,"line"])
+function found(tok,   line) {
+    line = CNT[ICNT,"line"]
+
+    if (Nflag) parser_warn(line)
+    else       print       line
 }
 
 function look(tok) { if (tok ~ REGEXP) found(tok) }
@@ -19,6 +22,8 @@ BEGIN {
 
     # the rest (any character)
     C    = "."
+
+    if (ARGV[1] == "-n") {Nflag = 1; shift()}
 
     REGEXP = ARGV[1]; shift()
 }
@@ -75,7 +80,7 @@ function req_nzero(e) {
 function zerop(l) { return length(l) == 0 }
 function ch(l, i) { return substr(l, i, 1)} # character
 
-function parser_warn(s) { printf "%s:%s\n", CNT[ICNT,"loc"], s | "cat 1>&2"; close("cat 1>&2")}
+function parser_warn(s) { printf "%s:%s\n", CNT[ICNT,"loc"], s}
 function no_end(s) { sub(/\n$/, "", s); sub(/^\n/, "", s); return s }
 
 function die (s)  { printf "ugrep: %s\n",   s | "cat 1>&2"; exit 1 }
@@ -84,5 +89,8 @@ function shift(  i) { for (i = 2; i < ARGC; i++) ARGV[i-1] = ARGV[i]; ARGC-- }
 ' "$@"
 
 # TEST: ugrep.t0
-# ./ugrep srclane1 test_data/sdstr.h > ugrep.out.txt
+# ./ugrep -n srclane1 test_data/sdstr.h > ugrep.out.txt
+#
+# TEST: ugrep.t1
+# ./ugrep   srclane1 test_data/sdstr.h > ugrep.out.txt
 

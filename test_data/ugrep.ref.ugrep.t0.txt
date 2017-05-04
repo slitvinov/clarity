@@ -1,0 +1,8 @@
+test_data/sdstr.h:133:  __forceinline__ __device__ void xchg_aos2f(int srclane0, int srclane1, int start, float& s0, float& s1) {
+test_data/sdstr.h:135:    float t1 = __shfl(s1, srclane1);
+test_data/sdstr.h:142:  __forceinline__ __device__ void xchg_aos4f(int srclane0, int srclane1, int start, float3& s0, float3& s1) {
+test_data/sdstr.h:143:    xchg_aos2f(srclane0, srclane1, start, s0.x, s1.x);
+test_data/sdstr.h:144:    xchg_aos2f(srclane0, srclane1, start, s0.y, s1.y);
+test_data/sdstr.h:145:    xchg_aos2f(srclane0, srclane1, start, s0.z, s1.z);
+test_data/sdstr.h:182:    int srclane1 = (32 * ((tid + 1) & 0x1) + tid) >> 1;
+test_data/sdstr.h:189:    xchg_aos4f(srclane0, srclane1, start, s0, s1);
