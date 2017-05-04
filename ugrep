@@ -4,11 +4,11 @@
 
 awk '
 
-function look0(tok) {
+function found(tok) {
     parser_warn(CNT[ICNT,"line"])
 }
 
-function look(tok) { if (tok ~ REGEXP) look0(tok) }
+function look(tok) { if (tok ~ REGEXP) found(tok) }
 
 BEGIN {
     # regexp for c language identifier
