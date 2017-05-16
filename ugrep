@@ -4,11 +4,11 @@
 
 awk '
 
-function found(tok,   line) {
+function found(tok,   line, out) {
     line = CNT[ICNT,"line"]
 
-    if (Nflag) parser_warn(line)
-    else       print       line
+    out = Oflag ? tok : line
+    if (Nflag) parser_warn(out); else print out
 }
 
 function look(tok) {
@@ -32,6 +32,7 @@ BEGIN {
     for (;;) {
 	if (ARGV[1] == "-n") {Nflag = 1; shift(); continue}
 	if (ARGV[1] == "-e") {Eflag = 1; shift(); continue}
+	if (ARGV[1] == "-o") {Oflag = 1; shift(); continue}
 	break
     }
     PAT = ARGV[1]; shift()
@@ -106,3 +107,10 @@ function fstr(s) {return s ""} # [f]orce [str]ing
 #
 # TEST: ugrep.t2
 # ./ugrep -e '^data[012]$' test_data/sdstr.h > ugrep.out.txt
+#
+# TEST: ugrep.t3
+# ./ugrep     -o srclane1 test_data/sdstr.h      > ugrep.out.txt
+#
+# TEST: ugrep.t4
+# ./ugrep -n -o srclane1 test_data/sdstr.h      > ugrep.out.txt
+

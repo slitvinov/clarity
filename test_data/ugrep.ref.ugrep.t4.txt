@@ -1,0 +1,8 @@
+test_data/sdstr.h:133:srclane1
+test_data/sdstr.h:135:srclane1
+test_data/sdstr.h:142:srclane1
+test_data/sdstr.h:143:srclane1
+test_data/sdstr.h:144:srclane1
+test_data/sdstr.h:145:srclane1
+test_data/sdstr.h:182:srclane1
+test_data/sdstr.h:189:srclane1
