@@ -1,0 +1,16 @@
+/* test */
+#define a 1
+#define c 42
+#define b 10
+/* test */
+#define a 1
+#define c 42
+#define b 20
+/* test */
+#define a 2
+#define c 42
+#define b 10
+/* test */
+#define a 2
+#define c 42
+#define b 20

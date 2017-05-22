@@ -3,67 +3,94 @@
 # Create several conf.h files for udx from a template ([cart]esian
 # product)
 
-{
-    F[NR] = $0
+BEGIN {
+    # output directory
+    O = ARGV[1]; shift()
 }
+{ F[N = NR] = $0 }
+END { step(1, 1, 0) }
 
-END {
-    n = NR
-
-    step(1, 1, 0)
-}
-
-function uncom(l) {
-    # sub("//.*", "") # c++ comments
+function uncom(l) { # uncomment a line :TODO:
+    sub(/\/\/.*/, "", l)          # c++ comment
+    gsub(/[/][*].*[*][/]/, "", l) # one line c comment
     return l
 }
 
-function emptyp(l) { return l ~ /^[ \t]*$/ }
+function emptyp(l) { return l ~ /^[ \t]*$/ } # [empty] [p]redicate
 
 function brp(l,   a, rc) { # [br]anch [p]redicate: is it a branch?
-                           # sets VAR
+			   # sets KEY
     l = uncom(l)
     split(l, a)
     rc = (a[1] == "#define" && a[2] ~ /^%/)
-    if (!rc) return !rc
-    VAR = a[2]; sub(/^%/, "", VAR)
+    if (rc) {
+	KEY = a[2]
+	sub(/^%/, "", KEY)
+    }
     return rc
 }
 
-function defp(l) {
+function defp(l) { # [def]ine [p]redicate: is it a #define statement?
     l = uncom(l)
     split(l, a)
     return a[1] == "#define"
 }
 
 function step(i, j, lvl) {
-    if   (i > n) step0(   j, lvl)
-    else         stepn(i, j, lvl)
+    if   (i > N) step0(   j - 1, lvl)
+    else         stepn(i,     j, lvl)
 }
 
-function stepn(i, j, lvl,   l, nxt, m, var, val) {
-    l = F[i]
-    if (!brp(l)) {
-	G[j] = l
-	step(i + 1, j + 1, lvl)
-    } else {
-	var = VAR
-	for (nxt = i + 1; nxt <= n && !defp(F[nxt]); nxt++) ; # find next position
-	for (m = i + 1; m < nxt; m++) {
-	    val = uncom(F[m])
-	    if (emptyp(val)) continue
-	    G[j] = "#define " var " " val
-	    step(nxt, j + 1, lvl + 1)
-	}
+function stepn_cont(i, j, lvl) {
+    G[j] = F[i]
+    step(i + 1, j + 1, lvl)
+}
+
+function stepn_branch(key, i, j, lvl,       nxt, m, val) {
+    for (nxt = i + 1; nxt <= N && !defp(F[nxt]); nxt++) ; # find next position
+    for (m = i + 1; m < nxt; m++) {
+	val = uncom(F[m])
+	if (emptyp(val)) continue
+	G[j] = "#define " key " " val
+	KEYS[lvl + 1] = key; VALS[lvl + 1] = val
+	step(nxt, j + 1, lvl + 1)
     }
 }
 
-function step0(n, lvl) { dump(G, n) }
-function dump(G, n,  i) {
-    for (i = 1; i <= n; i++)
-	print G[i]
-    print "/* end */"
+function stepn(i, j, lvl) {
+    if (!brp(F[i])) stepn_cont(i, j, lvl);
+    else            stepn_branch(KEY, i, j, lvl)
 }
 
+function step0(n, lvl) { dump(G, n, lvl) }
+function dname(lvl,   l, d, sep) {
+    for (l = 1; l <= lvl; l ++) {
+	sep = (l == 1) ? "" : ","
+	d = d sep KEYS[l] ":" VALS[l]
+    }
+    return d
+}
+
+function mkdir(d, cmd) {
+    cmd = sprintf("mkdir -p -- '%s'", d)
+    system(cmd)
+}
+
+function dump(G, n, lvl,    i, d, f) {
+    mkdir(d = O "/" dname(lvl))
+    f = d "/" ".conf.h"
+    for (i = 1; i <= n; i++) print G[i] > f
+    close(f)
+}
+
+function shift(  i) { for (i = 2; i < ARGC; i++) ARGV[i-1] = ARGV[i]; ARGC-- }
+
 # TEST: ucart.t0
-# ./ucart test_data/t0.h   > conf.out.h
+# rm -rf o
+# ./ucart o test_data/t0.h
+# cat o/*/.conf.h >        cont.out.h
+
+# TEST: ucart.t1
+# rm -rf o
+# ./ucart o test_data/t1.h
+# cat o/.conf.h >        cont.out.h
