@@ -1,0 +1,128 @@
+#!/usr/bin/awk -f
+
+# Track dependencies
+#
+# Usage:
+# udeps *.cu
+
+BEGIN {
+    # system header
+    asplit("cuda.h stdlib.h stdio.h errno.h mpi.h hdf5.h pthread.h " \
+	   "cuda_runtime.h stdint.h unistd.h math.h math_functions.h " \
+	   "geom-wrapper.h", sys_hdr)
+
+    # should be local
+    asplit("ranks.h", local)
+}
+
+function fullname(f) { # extend file name in make rule
+    if (f in local) return f
+    else            return "$S/" f
+}
+
+function dep_list(d, f, n,   i, ans, sep) { # return dep as a string
+    ans = ""
+    for (i = 1; i <= n; i++) {
+	sep = i == 1 ? "" : " "
+	ans = ans sep fullname(d[f,i])
+    }
+    return ans
+}
+
+function dswap(d, f, i, j,     tmp) {
+    tmp = d[f, i]; d[f, i] = d[f, j]; d[f, j] = tmp
+}
+
+function inc(d, fn, hd, n,   i) { # is the file `fn' already includes
+				  # `hd'
+    for (i = 1; i <= n; i++)
+	if (d[fn,i] == hd) return 1
+    return 0
+}
+
+function dsort(d, f, n,   i, j) { # sort deps in O(N^2)
+    for (i=1; i<=n; i++)
+	for (j=i; j<=n; j++)
+	    if (d[f,j] < d[f,i]) dswap(d, f, i, j)
+}
+
+function asplit(str, arr,   temp, i, n) {  # make an assoc array from str
+    n = split(str, temp)
+    for (i = 1; i <= n; i++) arr[temp[i]]++
+    return n
+}
+
+function nxt(r,   tok) { # next token; moves in F
+    if (!match(F, "^" r)) return
+    tok = substr(F, 1, RLENGTH)
+    F   = substr(F, 1 + RLENGTH)
+    return tok
+}
+
+function extract_header(s,   BL, to, o, hd) { # from # includes <bla-bla.h> to bla-bla.h
+			    # sets HAS_LG = 1 if "< >"
+    ### [b] # [b] include [b] "header" [...]
+    ### [b] # [b] include [b] <header> [...]
+    F = s
+    BL = "[ \\t]*" # blanks
+    nxt(BL)
+    tok = nxt("#")       # TODO: check error
+    tok = nxt("include")
+    nxt(BL)
+    o = nxt("[<\"]") # opening
+    HAS_LG = (o == "<")
+    hd = HAS_LG ? nxt("[^>]*") :  nxt("[^\"]*")
+    return hd
+}
+
+/^[\t ]*#[\t ]*include/ {
+    hd = extract_header($0)
+
+    has_h =     hd ~ /[.]h$/
+    has_sys =   hd ~ /^sys\//
+    has_thrust = hd ~ /^thrust\//
+
+    if (!has_h || has_sys || HAS_LG || has_thrust) next
+
+    if (hd in sys_hdr)               next
+    process(FILENAME, hd)
+}
+
+function process(fn, hd,  n) {
+    n = ++ndep_be[fn] # `f' depends on fn (shouble be "before")
+    if (inc(dep_be, fn, hd, n)) printf "%s:%d:error:\n", fn, FNR | "cat >&2"
+    dep_be[fn,n]  = hd
+
+    n = ++ndep_af[hd]       # fn depends of `f' (shouble be "after")
+    dep_af[hd,n]  = fn
+}
+
+
+function makefile_header(  cmd) {
+    cmd = "udeps *.cu *.h k/*.h last-bit/*.cu dpd/*.cu dpd/*.h"
+    printf "# Generated with %s\n", cmd
+    printf "\n"
+}
+
+function cu2o(f) {
+    sub(/[.]cu$/, ".o", f)
+    return f
+}
+
+function makefile_rule(    f, fo) {
+    for (f in ndep_be)
+	dsort(dep_be, f, ndep_be[f])
+    for (f in ndep_be) {
+	fo = cu2o(f)
+	printf "%s: %s\n", fo, dep_list(dep_be, f, ndep_be[f]) | "sort"
+    }
+ }
+
+END {
+    makefile_header()
+    makefile_rule()
+}
+
+# TEST: deps.t0
+# S=../src
+# udeps $S/*.cu $S/*.h $S/*/*.cu $S/*/*.h > Makefile.out.deps
