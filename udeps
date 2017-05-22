@@ -123,6 +123,6 @@ END {
     makefile_rule()
 }
 
+## Run S=$HOME/work/udx/kulina/rbc_shear/src atest udeps
 # TEST: deps.t0
-# S=../src
-# udeps $S/*.cu $S/*.h $S/*/*.cu $S/*/*.h > Makefile.out.deps
+# (cd ${S-.} && udeps *.cu *.h */*.cu */*.h) > Makefile.out.deps
