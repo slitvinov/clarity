@@ -14,10 +14,14 @@ END {
 }
 
 function uncom(l) {
+    # sub("//.*", "") # c++ comments
     return l
 }
 
-function brp(l,   a, rc) {
+function emptyp(l) { return l ~ /^[ \t]*$/ }
+
+function brp(l,   a, rc) { # [br]anch [p]redicate: is it a branch?
+                           # sets VAR
     l = uncom(l)
     split(l, a)
     rc = (a[1] == "#define" && a[2] ~ /^%/)
@@ -26,23 +30,30 @@ function brp(l,   a, rc) {
     return rc
 }
 
+function defp(l) {
+    l = uncom(l)
+    split(l, a)
+    return a[1] == "#define"
+}
+
 function step(i, j, lvl) {
     if   (i > n) step0(   j, lvl)
     else         stepn(i, j, lvl)
 }
 
-function stepn(i, j, lvl,   l, k, m, var) {
+function stepn(i, j, lvl,   l, nxt, m, var, val) {
     l = F[i]
     if (!brp(l)) {
 	G[j] = l
 	step(i + 1, j + 1, lvl)
     } else {
 	var = VAR
-	k = i + 1
-	while (k <= n && F[k] !~ /#define/) k++
-	for (m = i + 1; m < k; m++) {
-	    G[j] = "#define " var " " F[m]
-	    step(k, j + 1, lvl + 1)
+	for (nxt = i + 1; nxt <= n && !defp(F[nxt]); nxt++) ; # find next position
+	for (m = i + 1; m < nxt; m++) {
+	    val = uncom(F[m])
+	    if (emptyp(val)) continue
+	    G[j] = "#define " var " " val
+	    step(nxt, j + 1, lvl + 1)
 	}
     }
 }
