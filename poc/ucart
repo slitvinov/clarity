@@ -9,13 +9,50 @@
 
 END {
     n = NR
-    dump()
+
+    step(1, 1, 0)
 }
 
-function dump(   i) {
+function uncom(l) {
+    return l
+}
+
+function brp(l,   a, rc) {
+    l = uncom(l)
+    split(l, a)
+    rc = (a[1] == "#define" && a[2] ~ /^%/)
+    if (!rc) return !rc
+    VAR = a[2]; sub(/^%/, "", VAR)
+    return rc
+}
+
+function step(i, j, lvl) {
+    if   (i > n) step0(   j, lvl)
+    else         stepn(i, j, lvl)
+}
+
+function stepn(i, j, lvl,   l, k, m, var) {
+    l = F[i]
+    if (!brp(l)) {
+	G[j] = l
+	step(i + 1, j + 1, lvl)
+    } else {
+	var = VAR
+	k = i + 1
+	while (k <= n && F[k] !~ /#define/) k++
+	for (m = i + 1; m < k; m++) {
+	    G[j] = "#define " var " " F[m]
+	    step(k, j + 1, lvl + 1)
+	}
+    }
+}
+
+function step0(n, lvl) { dump(G, n) }
+function dump(G, n,  i) {
     for (i = 1; i <= n; i++)
-	print F[i]
+	print G[i]
+    print "/* end */"
 }
 
-# cTEST: ucart.t0
-# 
+# TEST: ucart.t0
+# ./ucart test_data/t0.h   > conf.out.h
