@@ -78,13 +78,12 @@ function extract_header(s,   BL, to, o, hd) { # from # includes <bla-bla.h> to b
 /^[\t ]*#[\t ]*include/ {
     hd = extract_header($0)
 
-    has_h =     hd ~ /[.]h$/
     has_sys =   hd ~ /^sys\//
     has_thrust = hd ~ /^thrust\//
 
-    if (!has_h || has_sys || HAS_LG || has_thrust) next
-
-    if (hd in sys_hdr)               next
+    if (has_sys || has_thrust) next
+    if (hd in sys_hdr)         next
+    
     process(FILENAME, hd)
 }
 
@@ -99,7 +98,7 @@ function process(fn, hd,  n) {
 
 
 function makefile_header(  cmd) {
-    cmd = "udeps *.cu *.h k/*.h last-bit/*.cu dpd/*.cu dpd/*.h"
+    cmd = "udeps"
     printf "# Generated with %s\n", cmd
     printf "\n"
 }
@@ -124,5 +123,5 @@ END {
 }
 
 ## Run S=$HOME/work/udx/kulina/rbc_shear/src atest udeps
-# TEST: deps.t0
+# cTEST: deps.t0
 # (cd ${S-.} && udeps *.cu *.h */*.cu */*.h) > Makefile.out.deps
