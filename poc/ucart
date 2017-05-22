@@ -73,7 +73,7 @@ function dname(lvl,   l, d, sep) {
 
 function mkdir(d, cmd) {
     cmd = sprintf("mkdir -p -- '%s'", d)
-    system(cmd)
+    return system(cmd)
 }
 
 function dump(G, n, lvl,    i, d, f) {
