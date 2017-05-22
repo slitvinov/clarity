@@ -6,11 +6,6 @@
 # udeps *.cu
 
 BEGIN {
-    # system header
-    asplit("assert.h cuda.h stdlib.h stdio.h errno.h mpi.h hdf5.h pthread.h " \
-	   "cuda_runtime.h stdint.h unistd.h math.h math_functions.h assert.h" \
-	   "geom-wrapper.h", sys_hdr)
-
     # should be local
     asplit("ranks.h", local)
 }
@@ -77,14 +72,7 @@ function extract_header(s,   BL, to, o, hd) { # from # includes <bla-bla.h> to b
 
 /^[\t ]*#[\t ]*include/ {
     hd = extract_header($0)
-
-    has_sys    = hd ~ /^sys\//
-    has_thrust = hd ~ /^thrust\//
-    has_h      = hd ~ /[.]h$/
-
-    if (!has_h || has_sys || has_thrust) next
-    if (hd in sys_hdr)         next
-
+    if (HAS_LG && !(hd in local)) next
     process(FILENAME, hd)
 }
 
