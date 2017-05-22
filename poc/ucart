@@ -1,0 +1,21 @@
+#!/usr/bin/awk -f
+
+# Create several conf.h files for udx from a template ([cart]esian
+# product)
+
+{
+    F[NR] = $0
+}
+
+END {
+    n = NR
+    dump()
+}
+
+function dump(   i) {
+    for (i = 1; i <= n; i++)
+	print F[i]
+}
+
+# cTEST: ucart.t0
+# 
