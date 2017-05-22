@@ -8,7 +8,7 @@
 BEGIN {
     # system header
     asplit("assert.h cuda.h stdlib.h stdio.h errno.h mpi.h hdf5.h pthread.h " \
-	   "cuda_runtime.h stdint.h unistd.h math.h math_functions.h " \
+	   "cuda_runtime.h stdint.h unistd.h math.h math_functions.h assert.h" \
 	   "geom-wrapper.h", sys_hdr)
 
     # should be local
