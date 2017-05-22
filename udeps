@@ -7,7 +7,7 @@
 
 BEGIN {
     # system header
-    asplit("cuda.h stdlib.h stdio.h errno.h mpi.h hdf5.h pthread.h " \
+    asplit("assert.h cuda.h stdlib.h stdio.h errno.h mpi.h hdf5.h pthread.h " \
 	   "cuda_runtime.h stdint.h unistd.h math.h math_functions.h " \
 	   "geom-wrapper.h", sys_hdr)
 
@@ -78,12 +78,13 @@ function extract_header(s,   BL, to, o, hd) { # from # includes <bla-bla.h> to b
 /^[\t ]*#[\t ]*include/ {
     hd = extract_header($0)
 
-    has_sys =   hd ~ /^sys\//
+    has_sys    = hd ~ /^sys\//
     has_thrust = hd ~ /^thrust\//
+    has_h      = hd ~ /[.]h$/
 
-    if (has_sys || has_thrust) next
+    if (!has_h || has_sys || has_thrust) next
     if (hd in sys_hdr)         next
-    
+
     process(FILENAME, hd)
 }
 
@@ -123,5 +124,5 @@ END {
 }
 
 ## Run S=$HOME/work/udx/kulina/rbc_shear/src atest udeps
-# cTEST: deps.t0
+# TEST: deps.t0
 # (cd ${S-.} && udeps *.cu *.h */*.cu */*.h) > Makefile.out.deps
