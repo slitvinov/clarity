@@ -51,7 +51,7 @@ function stepn_branch(key, i, j, lvl,       nxt, m, val) {
     for (m = i + 1; m < nxt; m++) {
 	val = uncom(F[m])
 	if (emptyp(val)) continue
-	G[j] = "#define " key " " val
+	G[j] = sprintf("#define %s (%s)",  key, val)
 	KEYS[lvl + 1] = key; VALS[lvl + 1] = val
 	step(nxt, j + 1, lvl + 1)
     }
