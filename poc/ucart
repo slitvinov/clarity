@@ -77,12 +77,14 @@ function mkdir(d, cmd) {
 }
 
 function dump(G, n, lvl,    i, d, f) {
-    mkdir(d = O "/" dname(lvl))
-    f = d "/" ".conf.h"
+    mkdir(d = join(O, dname(lvl)))
+    f = join(d, ".conf.h")
     for (i = 1; i <= n; i++) print G[i] > f
     close(f)
+    print d
 }
 
+function join(a, b) { return (length(b) > 0) ? a "/" b : a } # for pathes
 function shift(  i) { for (i = 2; i < ARGC; i++) ARGV[i-1] = ARGV[i]; ARGC-- }
 
 # TEST: ucart.t0
