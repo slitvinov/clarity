@@ -96,3 +96,8 @@ function shift(  i) { for (i = 2; i < ARGC; i++) ARGV[i-1] = ARGV[i]; ARGC-- }
 # rm -rf o
 # ./ucart o test_data/t1.h
 # cat o/.conf.h >        cont.out.h
+
+# TEST: ucart.t2
+# rm -rf o
+# ./ucart o test_data/t2.h
+# cat o/*/.conf.h >        cont.out.h
