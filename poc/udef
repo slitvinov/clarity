@@ -1,0 +1,26 @@
+#!/bin/bash
+
+# Usage:
+# udef A=42 B=4.2 -> #define A (42)\n#define B (4.2)
+
+awk '
+BEGIN {
+    if (ARGV[1] == "-h" || ARGV[1] == "--help") usg()
+    for (i = 1; i < ARGC; i++) {
+	d = ARGV[i]
+	n = split(d, a, "=")
+	if (n != 2) err("udef: wrong argument: " d)
+	key = a[1]; val = a[2]
+	printf "#define %s (%s)\n", key, val
+    }
+}
+function err(s) { printf "%s\n", s | "cat >&2"; usg() }
+function usg(s) { print  "usage: udef [KEY=VAL].." | "cat >&2"; exit }
+' "$@"
+
+# TEST: udef.t0
+# udef A=42 B=4.2 > def.out.h
+
+# TEST: udef.t1
+# udef A=42 B=\"preved\" > def.out.h
+#
