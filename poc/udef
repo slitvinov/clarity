@@ -23,7 +23,7 @@ function file(f,  cmd) {
 }
 function keyval(key, val) { printf "#define %s (%s)\n", key, val }
 function err(s) { printf "%s\n", s | "cat >&2"; usg() }
-function usg(s) { print  "usage: udef [KEY=VAL].." | "cat >&2"; exit }
+function usg(s) { print  "usage: udef [[file].. [KEY=VAL]..].." | "cat >&2"; exit }
 ' "$@"
 
 # TEST: udef.t0
