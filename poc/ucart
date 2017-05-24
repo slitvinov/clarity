@@ -1,4 +1,4 @@
-#!/usr/bin/awk -f
+#!/usr/bin/awk  -f
 
 # Create several conf.h files for udx from a template ([cart]esian
 # product)
@@ -15,7 +15,7 @@ END { step(1, 1, 0) }
 
 function uncom(l) { # uncomment a line :TODO:
     sub(/\/\/.*/, "", l)          # c++ comment
-    gsub(/[/][*].*[*][/]/, "", l) # one line c comment
+    gsub(/[\/][*].*[*][\/]/, "", l) # one line c comment
     return l
 }
 
