@@ -1,4 +1,4 @@
-#!/usr/bin/awk  -f
+#!/usr/bin/awk -f
 
 # Create several conf.h files for udx from a template ([cart]esian
 # product)
