@@ -86,12 +86,6 @@ function process(fn, hd,  n) {
 }
 
 
-function makefile_header(  cmd) {
-    cmd = "udeps"
-    printf "# Generated with %s\n", cmd
-    printf "\n"
-}
-
 function cu2o(f) {
     sub(/[.]cu$/, ".o", f)
     return f
@@ -107,7 +101,6 @@ function makefile_rule(    f, fo) {
  }
 
 END {
-    makefile_header()
     makefile_rule()
 }
 
